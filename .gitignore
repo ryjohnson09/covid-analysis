@@ -4,3 +4,4 @@
 .Ruserdata
 .env
 .venv/*
+shiny-app-py/__pycache__/*
