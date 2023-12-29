@@ -1,30 +1,36 @@
 from shiny import App, render, ui
 import requests
 import json
+from datetime import datetime
 
-api_url = "https://woodoo-orangutan.staging.eval.posit.co/cnct/content/316fd4e0-2375-44e1-8fe4-7e0b943da00b/predict" 
+# Define URL for API
+api_url = "https://woodoo-orangutan.staging.eval.posit.co/cnct/covid-predict/predict" 
 
+# User Interfact
 app_ui = ui.page_fluid(
-    ui.input_slider("n", "N", 0, 365, 20),
+    ui.input_date("day", "Select Date:", value="2021-01-01"),
     ui.output_text_verbatim("txt"),
 )
 
-
+# Server Function
 def server(input, output, session):
     @render.text
     def txt():
        
         # Parameters to be included in the query string
+        #  Convert date to number of year
         params = [{
-            'DayOfYear': input.n()
+            'DayOfYear': input.day().strftime("%j")
         }]
 
-        # Make a GET request with parameters
+        # Make a POST request with parameters
         response = requests.post(api_url, json=params)
-        json_data = response.json()
-        return f"n*2 is {json_data}"
+
+        # Parse API response
+        json_data = round(response.json()['predict'][0])
+
+        # Return message
+        return f"Predicted number of COVID cases: {json_data}"
 
 
 app = App(app_ui, server)
-
-
