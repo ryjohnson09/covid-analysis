@@ -93,7 +93,7 @@ server <- function(input, output) {
            title = glue("New Cases per Day in {state_province}")) +
       scale_x_date(date_labels = "%b %d") +
       geom_vline(xintercept = as.Date(format(date_number(), "%b %d"), "%b %d"),
-                 size = 2, linetype = "dashed", color = "#9A4665") +
+                 linewidth = 2, linetype = "dashed", color = "#9A4665") +
       theme_minimal() 
   })
 }
