@@ -6,6 +6,7 @@ library(jsonlite)
 library(tidyverse)
 library(bsicons)
 library(glue)
+library(scales)
 
 # Setup ---------------------------------------------------------
 
@@ -32,12 +33,12 @@ ui <- page_sidebar(
     fill = FALSE,
     value_box(
       title = "Total Reported Cases:",
-      value = max(covid_data$state_count),
+      value = comma(max(covid_data$state_count)),
       showcase = bsicons::bs_icon("bug")
     ),
     value_box(
       title = "Single Day Max Cases:",
-      value = max(covid_data$new_cases),
+      value = comma(max(covid_data$new_cases)),
       showcase = bsicons::bs_icon("calendar-day")
     ),
     value_box(
@@ -90,11 +91,18 @@ server <- function(input, output) {
       geom_point(size = 3, alpha = 0.8) +
       labs(x = "Day of Year",
            y = "New Covid Cases",
-           title = glue("New Cases per Day in {state_province}")) +
+           title = glue("New Cases per Day in {state_province}"),
+           subtitle = "From Jan 2020 to March 2023") +
       scale_x_date(date_labels = "%b %d") +
+      scale_y_continuous(labels = comma_format()) +
       geom_vline(xintercept = as.Date(format(date_number(), "%b %d"), "%b %d"),
                  linewidth = 2, linetype = "dashed", color = "#9A4665") +
-      theme_minimal() 
+      theme_minimal() +
+      theme(
+        axis.text = element_text(size = 15),
+        plot.title = element_text(size = 20, face = "bold"),
+        axis.title = element_text(size = 15, face = "bold")
+      )
   })
 }
 
