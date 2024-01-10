@@ -13,6 +13,7 @@ board = pins.board_connect(allow_pickle_read=True)
 covid = board.pin_read("publisher1/covid_data")
 ```
 
+## Create Model
 
 ```{python}
 import pandas as pd
@@ -47,6 +48,7 @@ plt.legend()
 plt.show()
 ```
 
+## Pin as Vetiver Model and Deploy as API
 
 ```{python}
 from vetiver import VetiverModel, VetiverAPI, vetiver_pin_write, deploy_rsconnect
@@ -61,9 +63,31 @@ vetiver_pin_write(board, v)
 
 # Serve model as an API
 connect_server = RSConnectServer(
-    url=os.getenv("CONNECT_SERVER"), # load from an .env file
-    api_key=os.getenv("CONNECT_API_KEY") # load from an .env file 
+    url=os.getenv("CONNECT_SERVER"), 
+    api_key=os.getenv("CONNECT_API_KEY")
 )
 
-deploy_rsconnect(board = board, pin_name = "publisher1/covid_model", connect_server=connect_server)
+deploy_rsconnect(board = board, pin_name = "publisher1/covid_model", connect_server = connect_server)
+```
+
+## Query API
+
+An example:
+
+```{python}
+from vetiver.server import predict, vetiver_endpoint
+from vetiver.data import mtcars
+import pandas as pd
+
+endpoint = vetiver_endpoint(
+    "https://hopping-armadillo.staging.eval.posit.co/cnct/content/36b225c4-8c07-4194-8763-e16ad138537f/predict"
+)
+
+api_key=os.getenv("CONNECT_API_KEY")
+
+params = pd.DataFrame({'DayOfYear': [99]})
+
+h = {"Authorization": f"Key {api_key}"}
+
+response = predict(endpoint=endpoint, data=params, headers=h).at[0, "predict"].round()
 ```

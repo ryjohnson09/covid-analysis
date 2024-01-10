@@ -1,10 +1,12 @@
 from shiny import App, render, ui
-import requests
-import json
+import os
+import vetiver
+import pandas as pd
 from datetime import datetime
 
-# Define URL for API
-api_url = "https://woodoo-orangutan.staging.eval.posit.co/cnct/covid-predict/predict" 
+# Define endpoint for API and key
+endpoint = vetiver.vetiver_endpoint("https://hopping-armadillo.staging.eval.posit.co/cnct/content/36b225c4-8c07-4194-8763-e16ad138537f/predict")
+api_key = os.getenv("CONNECT_API_KEY") 
 
 # User Interfact
 app_ui = ui.page_fluid(
@@ -19,18 +21,18 @@ def server(input, output, session):
        
         # Parameters to be included in the query string
         #  Convert date to number of year
-        params = [{
-            'DayOfYear': input.day().strftime("%j")
-        }]
+        params = pd.DataFrame({
+            'DayOfYear': [input.day().strftime("%j")]
+        })
 
-        # Make a POST request with parameters
-        response = requests.post(api_url, json=params)
+        # If needed, add authorization
+        h = {"Authorization": f"Key {api_key}"}
 
-        # Parse API response
-        json_data = round(response.json()['predict'][0])
+        # Make a prediction
+        response = vetiver.predict(endpoint=endpoint, data=params, headers=h).at[0, "predict"].round()
 
         # Return message
-        return f"Predicted number of COVID cases: {json_data}"
+        return f"Predicted number of COVID cases: {response}"
 
 
 app = App(app_ui, server)
