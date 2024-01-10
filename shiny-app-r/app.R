@@ -1,8 +1,8 @@
 library(shiny)
 library(bslib)
 library(pins)
-library(httr2)
-library(jsonlite)
+library(vetiver)
+library(httr)
 library(tidyverse)
 library(bsicons)
 library(glue)
@@ -10,7 +10,7 @@ library(scales)
 
 # Setup ---------------------------------------------------------
 
-# Read in Data
+# Read in data
 board <- pins::board_connect()
 covid_data <- pin_read(board, "publisher1/covid_data") %>% 
   tibble() %>%
@@ -18,8 +18,13 @@ covid_data <- pin_read(board, "publisher1/covid_data") %>%
   mutate(month_day = format(date, "%b %d")) %>% 
   mutate(years_date = as.Date(month_day, "%b %d"))
 
-api_url <- "https://woodoo-orangutan.staging.eval.posit.co/cnct/covid-predict/predict"
+# Create vetiver endpoint
+endpoint <- vetiver_endpoint("https://hopping-armadillo.staging.eval.posit.co/cnct/content/36b225c4-8c07-4194-8763-e16ad138537f/predict")
 
+# Grab Connect API Key
+api_key <- Sys.getenv("CONNECT_API_KEY")
+
+# Extract State/Province
 state_province <- covid_data$province_state[1]
 
 # UI -----------------------------------------------------------
@@ -69,13 +74,13 @@ server <- function(input, output) {
       DayOfYear = year_day_number()
     )
     
-    # Get API response
-    response <- request(api_url) %>% 
-      req_body_json(params) %>% 
-      req_perform() %>% 
-      resp_body_json()
+    # Get prediction
+    response <- predict(
+      endpoint,
+      params,
+      add_headers(Authorization = paste("Key", api_key)))
     
-    # Return response
+    # Round predicted cases
     round(response$predict[[1]])
   })
     
