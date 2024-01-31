@@ -4,7 +4,8 @@ import vetiver
 import pandas as pd
 
 # Define endpoint for API and key
-endpoint = vetiver.vetiver_endpoint("https://hopping-armadillo.staging.eval.posit.co/cnct/content/36b225c4-8c07-4194-8763-e16ad138537f/predict")
+api_url = "___"
+endpoint = vetiver.vetiver_endpoint(api_url + "/predict")
 api_key = os.getenv("CONNECT_API_KEY") 
 
 # User Interface
