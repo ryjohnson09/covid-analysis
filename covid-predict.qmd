@@ -80,10 +80,10 @@ from vetiver.data import mtcars
 import pandas as pd
 
 # Add API Content URL below
-content_url = "___"
+api_url = "___"
 
 endpoint = vetiver_endpoint(
-    content_url + "/predict"
+    api_url + "/predict"
 )
 
 api_key=os.getenv("CONNECT_API_KEY")
