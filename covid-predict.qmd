@@ -93,4 +93,6 @@ params = pd.DataFrame({'DayOfYear': [99]})
 h = {"Authorization": f"Key {api_key}"}
 
 response = predict(endpoint=endpoint, data=params, headers=h).at[0, "predict"].round()
+
+response
 ```
