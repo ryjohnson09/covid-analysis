@@ -20,9 +20,10 @@ library(dbplyr)
 ## Connect to Data
 
 ```{r}
-# Make ODBC connection once it's fixed in test drive
-#  https://github.com/rstudio/evaluations/issues/402
-con <- dbConnect(duckdb::duckdb(), dbdir = "/data/duckdb/database/demo-datasets.db")
+# Connect to DuckDB
+con <- dbConnect(duckdb::duckdb(), 
+                 dbdir = "/data/duckdb/database/demo-datasets.db", 
+                 read_only = TRUE)
 
 # Check available datasets in DuckDB
 dbListTables(con)
@@ -35,7 +36,7 @@ dbListTables(con)
 
 covid <- tbl(con, "covid") |> 
   # Make a filter in DB
-  filter(province_state == "Maryland") |> 
+  filter(province_state == "Pennsylvania") |> 
   # Read into memory
   collect()
 ```
