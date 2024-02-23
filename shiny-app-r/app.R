@@ -19,7 +19,7 @@ covid_data <- pin_read(board, "publisher1/covid_data") %>%
   mutate(years_date = as.Date(month_day, "%b %d"))
 
 # Create vetiver endpoint
-api_url <- "___"
+api_url <- Sys.getenv("API_URL")
 endpoint <- vetiver_endpoint(paste0(api_url, "/predict"))
 
 # Grab Connect API Key
