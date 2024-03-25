@@ -1,0 +1,98 @@
+---
+title: "Predict Covid Cases"
+format: html
+---
+
+## Read in Data
+
+```{python}
+import pins
+
+board = pins.board_connect(allow_pickle_read=True)
+
+covid = board.pin_read("publisher1/covid_data")
+```
+
+## Create Model
+
+```{python}
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
+import matplotlib.pyplot as plt
+
+# Convert to date class
+covid["date"] = pd.to_datetime(covid["date"])
+
+# Feature engineering: Extracting day of the year as a feature
+covid["DayOfYear"] = covid["date"].dt.dayofyear
+
+# Extract columns of interest
+df = covid[["DayOfYear", "new_cases"]]
+
+# Create and train a linear regression model
+covid_model = make_pipeline(PolynomialFeatures(4), LinearRegression()).fit(df.drop(columns="new_cases"), df["new_cases"])
+
+# Make predictions on the test set
+covid_pred = covid_model.predict(df.drop(columns="new_cases"))
+
+# Visualize the results
+plt.scatter(df.drop(columns="new_cases"), df["new_cases"], color='black', label='Actual')
+plt.scatter(df.drop(columns="new_cases"), covid_pred, color='blue', s=2, label='Predicted')
+plt.xlabel('Day of Year')
+plt.ylabel('Number of Cases')
+plt.legend()
+plt.show()
+```
+
+## Pin as Vetiver Model and Deploy as API
+
+```{python}
+from vetiver import VetiverModel, VetiverAPI, vetiver_pin_write, deploy_rsconnect
+from rsconnect.api import RSConnectServer
+import os
+
+# Create Vetiver model
+v = VetiverModel(covid_model, model_name = "publisher1/covid_model", prototype_data=df.drop(columns="new_cases"))
+
+# Save model as pins
+vetiver_pin_write(board, v)
+
+# Serve model as an API
+connect_server = RSConnectServer(
+    url=os.getenv("CONNECT_SERVER"), 
+    api_key=os.getenv("CONNECT_API_KEY")
+)
+
+deploy_rsconnect(board = board, pin_name = "publisher1/covid_model", connect_server = connect_server)
+```
+
+## Query API
+
+An example:
+
+```{python}
+from vetiver.server import predict, vetiver_endpoint
+from vetiver.data import mtcars
+import pandas as pd
+
+# Add API Content URL below
+api_url = "___"
+
+endpoint = vetiver_endpoint(
+    api_url + "/predict"
+)
+
+api_key=os.getenv("CONNECT_API_KEY")
+
+params = pd.DataFrame({'DayOfYear': [99]})
+
+h = {"Authorization": f"Key {api_key}"}
+
+response = predict(endpoint=endpoint, data=params, headers=h).at[0, "predict"].round()
+
+response
+```
