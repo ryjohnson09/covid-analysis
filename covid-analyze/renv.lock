@@ -189,16 +189,16 @@
     },
     "duckdb": {
       "Package": "duckdb",
-      "Version": "0.9.2-1",
+      "Version": "0.10.0",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "DBI",
         "R",
         "methods",
         "utils"
       ],
-      "Hash": "3ce50b727c58e724c4c61397a41946ac"
+      "Hash": "93c078cf614d23bb15da5a947e1ad3fa"
     },
     "ellipsis": {
       "Package": "ellipsis",

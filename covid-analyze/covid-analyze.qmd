@@ -36,7 +36,7 @@ dbListTables(con)
 
 covid <- tbl(con, "covid") |> 
   # Make a filter in DB
-  filter(province_state == "Pennsylvania") |> 
+  filter(province_state == "Maryland") |> 
   # Read into memory
   collect()
 ```
